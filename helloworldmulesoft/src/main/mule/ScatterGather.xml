@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="ScatterGatherFlow" doc:id="99931bbd-c04b-427a-8971-8e5af93b8fbc" >
+		<http:listener doc:name="GET /localizacion/persona" doc:id="0b6d73ed-b355-4c5a-8bf8-5ba8753fc1df" config-ref="HTTP_Listener_config" path="/localizacion/persona" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.curp]" doc:name="Set Variable" doc:id="9110f065-90ab-4ce1-906e-3328144a05a9" variableName="idPersona"/>
+		<logger level="INFO" doc:name="Logger" doc:id="2e474f5b-2320-444a-a1d5-a80b2f5ee5f0" message="Before Proccessing Scatter-Gather "/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="dd80a342-6083-4bb9-80e3-48531ea9869b" >
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="71af82ec-0241-4e35-bc0f-77798112d590" message="1.- DMV: Performing a query in the DMV database to verify if there are vehicles registered in the person's name....."/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="74912ee9-ebf2-4db1-bcad-2e4cab596bc6" message="2.- Property Registry: Performing a query in the Property Registry database to verify if the person has properties registered....."/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="a26c39fa-b12e-472c-becf-7a0521a3a74f" message="3.- Voter Registry: Performing a query in the Voter Registry to obtain the registered address of the person....."/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="5be7d87f-6a20-4acf-b2f3-d14c1b20cd69" message="4.- IRS: Performing a query in the IRS database to verify if the person has any tax activity and their TIN (Taxpayer Identification Number)....."/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="094bdd2b-cba1-40fd-80b3-7fc6433c5911" message="5.- Social Security Administration (SSA): Performing a query in the Social Security Administration database to verify the person's employment and work history....."/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="4e42d487-ef87-4397-99c0-2bf65d7ed83a" message="6.- Criminal Records Database: Performing a query in the criminal records database to verify the criminal history of the person....."/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="3b0f5c64-da89-4339-9ec0-319262445bf1" message="7.- Immigration: Performing a query in the Immigration database to verify the person's migration movements and immigration status....."/>
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="Logger" doc:id="28919977-8bbb-470b-9d08-2918ab483551" message="After Proccessing Scatter-Gather... Transforming Dataweave"/>
+		<set-payload value='{
+  "status": "success",
+  "data": {
+    "DMV": {
+      "found": true,
+      "vehicles": [
+        {
+          "license_plate": "ABC1234",
+          "make": "Toyota",
+          "model": "Camry",
+          "year": 2018
+        },
+        {
+          "license_plate": "XYZ5678",
+          "make": "Honda",
+          "model": "Civic",
+          "year": 2020
+        }
+      ]
+    },
+    "PropertyRegistry": {
+      "found": true,
+      "properties": [
+        {
+          "address": "123 Main St, Springfield, IL",
+          "type": "Residential",
+          "value": 250000
+        },
+        {
+          "address": "456 Oak Ave, Springfield, IL",
+          "type": "Commercial",
+          "value": 500000
+        }
+      ]
+    },
+    "VoterRegistry": {
+      "found": true,
+      "registered_address": "789 Pine St, Springfield, IL"
+    },
+    "IRS": {
+      "found": false,
+      "message": "No tax activity found"
+    },
+    "SSA": {
+      "found": true,
+      "employment_history": [
+        {
+          "employer": "Tech Corp",
+          "position": "Software Engineer",
+          "years": "2015-2020"
+        },
+        {
+          "employer": "Web Solutions",
+          "position": "Senior Developer",
+          "years": "2020-present"
+        }
+      ]
+    },
+    "CriminalRecords": {
+      "found": false,
+      "message": "No criminal records found"
+    },
+    "Immigration": {
+      "found": false,
+      "message": "No immigration records found"
+    }
+  }
+}' doc:name="Set Payload" doc:id="eb042d93-d65c-4a4b-8c82-b5a60ac3e08d" mimeType="application/json" encoding="UTF-8"/>
+		<ee:transform doc:name="Transform Message" doc:id="0060a894-3b86-458e-97e4-147e2f050b7d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

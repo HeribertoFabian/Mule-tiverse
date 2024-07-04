@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<file:config name="File_Config_batch" doc:name="File Config" doc:id="b0b7a009-1728-4a31-8d0e-e70b711ef28c" >
+		<file:connection workingDir="C:\demo\batch" />
+	</file:config>
+	<flow name="BatchProcessingFlow" doc:id="3a65c801-fcef-4a74-9f0a-f73b1fc80e4d" >
+		<file:listener doc:name="On New or Updated File" doc:id="eeecfdd2-abe4-4870-8bba-6bae289ced59" config-ref="File_Config_batch" directory="C:\demo\batch" autoDelete="true" moveToDirectory="C:\demo\output">
+			<scheduling-strategy >
+				<fixed-frequency />
+			</scheduling-strategy>
+		</file:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="98dd034b-f84a-42dc-8e91-a3ebb2c8797c" message="Logger sTep"/>
+		<ee:transform doc:name="Transform Message" doc:id="edbb2658-21b5-41ae-b545-65d54b823cb2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<batch:job jobName="Batch_Job" doc:id="6b602a13-1502-4dc6-aa59-cb11a22f1acd" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="936d6a65-dc83-410f-bb17-b96a98fa5fa8" >
+					<set-variable value="#[payload.policyID]" doc:name="Set Variable" doc:id="f19abf90-1eb1-4eaa-8f96-61d1a30fa2d1" variableName="insuranceName"/>
+					<ee:transform doc:name="Transform Message" doc:id="c8cfc5f0-f842-4978-ab1e-85f1a6bc576b" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<file:write doc:name="Write" doc:id="4362bf04-7c11-4e7a-b7b4-1762cf8f3e24" config-ref="File_Config_output" path='#[vars.insuranceName ++ ".csv"]'/>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+	</flow>
+</mule>

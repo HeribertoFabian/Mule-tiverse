@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="ChoiceRouterFlow" doc:id="072a1c73-b806-427a-affc-9beaed462fd2" >
+		<http:listener doc:name="GET /products" doc:id="64aad2d4-8f2c-457d-a794-316a53d2a7ce" config-ref="HTTP_Listener_config" path="/products" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.category]" doc:name="Set Variable" doc:id="087e8c21-e2cf-4b50-8621-1798ef3968e9" variableName="categoryVar"/>
+		<choice doc:name="Choice" doc:id="68c32684-4279-4ddd-abc2-a7f84b227549" >
+			<when expression='#[vars.categoryVar == "Electronics"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="b808cdfb-6089-4ba4-8c43-c601f65db263" message="*** Categoria de Elecrtonicos *** "/>
+				<set-payload value='{
+              "category": "Electronics",
+              "products": [
+                {
+                  "id": 1,
+                  "name": "Smartphone",
+                  "price": 699.99,
+                  "quantity": 150
+                },
+                {
+                  "id": 2,
+                  "name": "Laptop",
+                  "price": 1299.99,
+                  "quantity": 85
+                },
+                {
+                  "id": 3,
+                  "name": "Headphones",
+                  "price": 199.99,
+                  "quantity": 200
+                }
+              ]
+            }' doc:name="Set Payload" doc:id="ed1538db-8cdc-4544-bf86-46040431d710" mimeType="application/json" encoding="UTF-8"/>
+				<ee:transform doc:name="Transform Message" doc:id="8ee363af-7ec5-44a3-aad7-4baeb03c71d4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.categoryVar == "Clothing"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="57d3ed2c-e845-4bd7-8633-cc13a0505a01" message="*** Categoria de Ropa *** "/>
+				<set-payload value='{
+              "category": "Clothing",
+              "products": [
+                {
+                  "id": 4,
+                  "name": "T-Shirt",
+                  "price": 19.99,
+                  "quantity": 500
+                },
+                {
+                  "id": 5,
+                  "name": "Jeans",
+                  "price": 49.99,
+                  "quantity": 300
+                },
+                {
+                  "id": 6,
+                  "name": "Jacket",
+                  "price": 89.99,
+                  "quantity": 120
+                }
+              ]
+            }' doc:name="Set Payload" doc:id="43fab5f8-bb80-4a78-8de1-5cde45f2d0fc" mimeType="application/json" encoding="UTF-8"/>
+				<ee:transform doc:name="Transform Message" doc:id="42acc64f-6f22-4650-8342-1ad4f2eb39f6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="f3d618dc-63e6-4fde-bfea-b3ba032c9cf3" message="*** Categoria no encontrada ***"/>
+				<set-payload value='{
+              "error": "Category not found",
+              "timestamp": "2024-07-02T10:00:00Z",
+              "errorId": "12345"
+            }'  doc:name="Set Payload" doc:id="feda2b6a-2ce6-4720-8f85-e208dd19c7db" mimeType="application/json" encoding="UTF-8"/>
+				<ee:transform doc:name="Transform Message" doc:id="2d43b3b5-66c2-4f18-8602-8c879c3bffe5" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

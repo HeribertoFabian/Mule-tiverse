@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="16b69991-af23-49c9-afc1-9e66add8fad0" >
+		<db:my-sql-connection host="127.0.0.1" port="3306" user="root" password="cambiame" database="employees"/>
+	</db:config>
+	<flow name="DBConnectionFlow" doc:id="fcb8bc4a-430a-4eaa-8d6b-ac040318d172" >
+		<http:listener doc:name="GET /database" doc:id="c1a2e4be-6db0-47b9-b7a8-54a36c7cb4a4" config-ref="HTTP_Listener_config" path="/database" allowedMethods="GET"/>
+		<logger level="INFO" doc:name="Logger" doc:id="9540811e-e12e-42d8-8100-2c625c844185" message="****It will require a MySQL DB with the following data sample https://github.com/datacharmer/test_db.git ****"/>
+		<db:select doc:name="Select" doc:id="6fcd4c83-b1fd-42ee-8608-851ff245b509" config-ref="Database_Config">
+			<db:sql ><![CDATA[select p.emp_no, p.first_name, p.last_name, p.gender, s.salary, t.title, d.dept_name 
+from 
+employees p JOIN salaries s ON p.emp_no=s.emp_no 
+JOIN titles t ON p.emp_no=t.emp_no 
+JOIN current_dept_emp cde ON p.emp_no=cde.emp_no 
+JOIN departments d ON cde.dept_no = d.dept_no limit 35;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="b47f358f-9947-44d4-b688-ea64f7a8ac73" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

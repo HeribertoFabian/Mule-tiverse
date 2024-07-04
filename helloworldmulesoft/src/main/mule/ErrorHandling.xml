@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="ErrorHandlingFlow" doc:id="0ef08cd3-8e0e-4d95-9af6-ba13484fd94a" >
+		<http:listener doc:name="POST /error" doc:id="63f5f4c4-45ca-420f-b337-16ec7190bf31" config-ref="HTTP_Listener_config" path="/error" allowedMethods="POST"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0c7493d1-475d-4b83-83b3-184e4f6add1b" message="** Before launch Error **"/>
+		<raise-error doc:name="Raise error" doc:id="28485974-18d1-446f-8821-4312c5b22bcd" type="MULE:CONNECTIVITY"/>
+		<logger level="INFO" doc:name="Logger" doc:id="eceb65a3-a60b-4b72-93f5-5185ba8c9c0a" message="** Never launched **"/>
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5557adb9-2522-4199-987a-7027c189096d" >
+				<logger level="INFO" doc:name="Logger" doc:id="f952c297-8157-489b-83b9-bf7ff2d1d1e1" message="** BEFORE On error CONTINUE **"/>
+				<flow-ref doc:name="Flow Reference" doc:id="84175259-e28b-495d-a22e-e50372372e43" name="ErrorHandlingContinue"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="ErrorHandlingContinue" doc:id="b7e4d6c9-8679-418a-bed8-60685d9e2bc0" >
+		<logger level="INFO" doc:name="Logger" doc:id="2ca02e12-2e14-42bf-9867-4228a8eef3ef" message="** ERROR HANDLING FLOW **"/>
+		<raise-error doc:name="Raise error" doc:id="a2d4b54c-b7f9-45d6-b6c1-d647e7920b6b" type="MULE:CONNECTIVITY"/>
+	</flow>
+</mule>

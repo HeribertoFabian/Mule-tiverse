@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="eb3a84ef-2824-4750-8233-e9af2735be6a" >
+		<wsc:connection wsdlLocation="http://www.dneonline.com/calculator.asmx?wsdl" service="Calculator" port="CalculatorSoap" address="http://www.dneonline.com/calculator.asmx" >
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<flow name="SOAPCalculatorFlow_add" doc:id="5e1ff0c1-cf06-41ae-8a55-7d06a550a8e9" >
+		<http:listener doc:name="Listener" doc:id="38a9f4c4-6519-4627-9993-fd2847ef4d5f" config-ref="HTTP_Listener_config" path="/addTwoNumbers" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.Number1]" doc:name="Set Variable" doc:id="f2d00634-a4bb-4cdd-8f72-ecd920cdfe94" variableName="var1"/>
+		<set-variable value="#[attributes.queryParams.Number2]" doc:name="Set Variable" doc:id="68ab0ff2-eb66-40cc-a56d-edec8addda22" variableName="var2"/>
+		<ee:transform doc:name="Transform Message" doc:id="962c6707-8e2f-48e4-a4a4-544a44643051" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+	ns0#Add: {
+		ns0#intA: vars.var1 as Number,
+		ns0#intB: vars.var2 as Number
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Consume" doc:id="710daa4c-8cda-4bde-b456-2bea9ebae2ef" config-ref="Web_Service_Consumer_Config" operation="Add"/>
+		<logger level="INFO" doc:name="Logger" doc:id="26503abd-285f-4292-b9d8-9fc563b8887b" message="#[%dw 2.0&#10;ns ns0 http://tempuri.org/&#10;---&#10;El resultado de la suma es payload.body.ns0#AddResponse.ns0#AddResult]"/>
+	</flow>
+	<flow name="SOAPCalculatorFlow_substract" doc:id="ea7911df-2f67-496a-a509-e16b554e8d59" >
+		<http:listener doc:name="Listener" doc:id="e1ef98ab-61d1-4674-b987-dd735c085b2b" config-ref="HTTP_Listener_config" path="/substract" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.Number1]" doc:name="Set Variable" doc:id="e66f021c-404f-46e0-ac2e-7eb5430866fa" variableName="var1"/>
+		<set-variable value="#[attributes.queryParams.Number2]" doc:name="Set Variable" doc:id="25c6ff1a-9d83-439e-a9df-da83d66f115a" variableName="var2"/>
+		<ee:transform doc:name="Transform Message" doc:id="b6678d45-5ccf-4418-a25c-1bca260e76f1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+	ns0#Subtract: {
+		ns0#intA: vars.var1 as Number,
+		ns0#intB: vars.var2 as Number
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Consume" doc:id="2c1c78b4-73cf-4dfa-bc93-adcd82ddacff" config-ref="Web_Service_Consumer_Config" operation="Subtract"/>
+		<logger level="INFO" doc:name="Logger" doc:id="d66b9b57-bfd1-44f2-87cb-36a37ac4dc61" message="#[%dw 2.0&#10;ns ns0 http://tempuri.org/&#10;---&#10;El resultado de la resta es payload.body.ns0#SubtractResponse.ns0#SubtractResult]"/>
+	</flow>
+	<flow name="SOAPCalculatorFlow_multiply" doc:id="667493ec-429a-4eb7-9486-ce7c2c90ed7e" >
+		<http:listener doc:name="Listener" doc:id="c35f3809-deb2-4391-adf3-3cd9da185098" config-ref="HTTP_Listener_config" path="/multiply" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.Number1]" doc:name="Set Variable" doc:id="750ab2ab-e2ba-4403-a7c2-beb4ce726fce" variableName="var1"/>
+		<set-variable value="#[attributes.queryParams.Number2]" doc:name="Set Variable" doc:id="8d8b7ac1-eaf1-45b1-9426-6eb51333f9a4" variableName="var2"/>
+		<ee:transform doc:name="Transform Message" doc:id="fbc7044e-5337-4017-9d73-3189dfbe607c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+	ns0#Multiply: {
+		ns0#intA: vars.var1 as Number,
+		ns0#intB: vars.var2 as Number
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Consume" doc:id="e2f39d2c-b74b-4a6b-a86f-f578373bb9bc" config-ref="Web_Service_Consumer_Config" operation="Multiply"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b62e3f0b-09b6-4564-9792-91873dec710b" message="#[%dw 2.0&#10;ns ns0 http://tempuri.org/&#10;---&#10;El resultado de la multiplicacion es payload.body.ns0#MultiplyResponse.ns0#MultiplyResult]"/>
+	</flow>
+</mule>
